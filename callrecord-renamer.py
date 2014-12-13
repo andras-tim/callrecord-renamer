@@ -5,6 +5,7 @@ from datetime import datetime
 import phonenumbers
 import os
 import re
+import sys
 from string import Template
 
 # REQUIREMENTS
@@ -81,14 +82,25 @@ class FileManager(object):
         if phone_number == "null":
             return None
 
-        parsed_number = phonenumbers.parse(phone_number, None)
-        international_number = phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+        try:
+            parsed_number = phonenumbers.parse(phone_number, None)
+            international_number = phonenumbers.format_number(parsed_number,
+                                                              phonenumbers.PhoneNumberFormat.INTERNATIONAL)
 
-        matches = INTERNATIONAL_PHONENUM_TEMPLATE.match(international_number)
-        if matches is None:
-            raise cls.PhoneNumberParseError("Can not parse the following phone number: %s" % phone_number)
+            matches = INTERNATIONAL_PHONENUM_TEMPLATE.match(international_number)
+            if matches is None:
+                raise cls.PhoneNumberParseError("Bad international format: %s" % international_number)
 
-        return matches.groupdict()
+            return matches.groupdict()
+
+        except phonenumbers.NumberParseException as e:
+            error_message = "ERROR: Can not parse properly the phone number! %s" % str({
+                "phone_number": phone_number,
+                "error": str(e),
+            })
+            sys.stderr.writelines([error_message])
+
+        return {"raw": phone_number}
 
     @classmethod
     def __substitute_fields_of_file(cls, file: dict):
@@ -104,6 +116,8 @@ class FileManager(object):
             elif key == "phonenum":
                 if file[key] is None:
                     substitutes[key] = "null"
+                elif "raw" in file[key].keys():
+                    substitutes[key] = file[key]["raw"]
                 else:
                     substitutes[key] = PHONENUM_TEMPLATE.substitute(file[key])
 
