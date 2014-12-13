@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import pprint
 import time
 from datetime import datetime
 import phonenumbers
@@ -35,9 +36,10 @@ class FileManager(object):
     class PhoneNumberParseError(Exception):
         pass
 
-    def __init__(self, base_directory: str, no_change=False):
+    def __init__(self, base_directory: str, no_change=False, skip_errors=False):
         self.path = base_directory
         self.no_change = no_change
+        self.skip_errors = skip_errors
 
     def update_files_in_directory(self):
         files = self.__get_prepared_renameable_files()
@@ -147,6 +149,23 @@ class FileManager(object):
         timestamp = int(time.mktime(change_time.timetuple()))+3600
         os.utime(path, (timestamp, timestamp))
 
+    def print_error(self, text: str, variables_for_debug=None, error=None):
+        error_message = ["", "=" * 80, text, "-" * 80]
+
+        if variables_for_debug is not None:
+            if self.skip_errors:
+                variables_for_debug["error"] = error
+            error_message.append(pprint.pformat(variables_for_debug))
+
+        error_message.extend(["=" * 80, "", ""])
+
+        sys.stdout.flush()
+        sys.stderr.write(os.linesep.join(error_message))
+        sys.stderr.flush()
+
+        if error is not None and not self.skip_errors:
+            raise error
+
 
 class ArgParser(object):
     def __init__(self):
@@ -155,6 +174,8 @@ class ArgParser(object):
         self.parser = argparse.ArgumentParser(description='Automatic rename tool for files of call recorder')
         self.parser.add_argument('-t', '--test', action='store_true', dest='no_change',
                                  help='test mode; filesystem will not be changed')
+        self.parser.add_argument('-s', '--skip', action='store_true', dest='skip_errors',
+                                 help='skip errors; process will not break when an error occurred')
         self.parser.add_argument('path', type=str,
                                  help='path of call files (%s)' % supported_extensions)
 
@@ -168,7 +189,7 @@ class ArgParser(object):
 
 def main():
     args = ArgParser().parse()
-    FileManager(args.path, args.no_change).update_files_in_directory()
+    FileManager(args.path, args.no_change, args.skip_errors).update_files_in_directory()
 
 
 if __name__ == '__main__':
