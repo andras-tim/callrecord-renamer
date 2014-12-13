@@ -3,6 +3,7 @@ import argparse
 import pprint
 import time
 from datetime import datetime
+from datetime import timedelta
 import phonenumbers
 import os
 import re
@@ -99,8 +100,17 @@ class FileManager(object):
             raise cls.ParseError("Bad date-time format! %s" % raw_datetime)
         datetime_matches = {k: int(v) for k, v in matches.groupdict().items()}
 
-        return datetime(datetime_matches["year"], datetime_matches["month"], datetime_matches["day"],
-                        datetime_matches["hour"], datetime_matches["min"], datetime_matches["sec"])
+        hour24_workaround = datetime_matches["hour"] == 24
+        if hour24_workaround:
+            datetime_matches["hour"] = 0
+
+        date_object = datetime(datetime_matches["year"], datetime_matches["month"], datetime_matches["day"],
+                               datetime_matches["hour"], datetime_matches["min"], datetime_matches["sec"])
+
+        if hour24_workaround:
+            date_object += timedelta(days=1)
+
+        return date_object
 
     def __parse_phone_number(self, raw_phone_number):
         parsed_phone_number = None
@@ -179,7 +189,7 @@ class FileManager(object):
 
     @classmethod
     def __set_change_times(cls, path: str, change_time: datetime):
-        timestamp = int(time.mktime(change_time.timetuple()))+3600
+        timestamp = int(time.mktime(change_time.timetuple())) + 3600
         os.utime(path, (timestamp, timestamp))
 
     def print_error(self, text: str, variables_for_debug=None, error=None):
