@@ -1,3 +1,6 @@
+# Callrecord Renamer
+Reformat special file names.
+
 ## Requirements
 
 * Python 3.x:
@@ -6,7 +9,7 @@
 
 * Python 'phonenumbers' Module: 
 
-   Run the following command: `C:\Python34\Scripts\easy_install.exe phonenumbers`
+   Run the following command on Windows: `C:\Python34\Scripts\easy_install.exe phonenumbers`
 
 ## Examples
 ```

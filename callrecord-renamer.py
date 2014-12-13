@@ -29,7 +29,7 @@ PHONENUM_TEMPLATE = Template('${country}(${region})${digits1}-${digits2}')
 TYPE_ENUM = {0: "BE", 1: "KI"}
 
 
-class FileRenamer(object):
+class FileManager(object):
     class PhoneNumberParseError(Exception):
         pass
 
@@ -39,18 +39,18 @@ class FileRenamer(object):
 
     def rename_files_in_directory(self):
         files = self.__get_prepared_renameable_files()
-        substituted_files = map(FileRenamer.__substitute_fields_of_file, files)
+        substituted_files = map(FileManager.__substitute_fields_of_file, files)
 
         for file in substituted_files:
             self.__rename(old_name=file["name"],
-                          new_name=FileRenamer.__new_name_for_file(file),
+                          new_name=FileManager.__new_name_for_file(file),
                           extension=file["extension"],
                           )
 
     def __get_prepared_renameable_files(self):
         files = os.listdir(self.path)
-        split_files = map(FileRenamer.__split_full_filename, files)
-        parsed_files = map(FileRenamer.__parse_file_name, split_files)
+        split_files = map(FileManager.__split_full_filename, files)
+        parsed_files = map(FileManager.__parse_file_name, split_files)
         filtered_parsed_files = filter(lambda f: f is not None, parsed_files)
 
         return filtered_parsed_files
@@ -71,7 +71,7 @@ class FileRenamer(object):
 
         file["type"] = int(matches.group("type"))
         file["datetime"] = datetime.strptime(matches.group("datetime"), DATETIME_PATTERN)
-        file["phonenum"] = FileRenamer.__parse_phone_number(matches.group("phonenum"))
+        file["phonenum"] = FileManager.__parse_phone_number(matches.group("phonenum"))
 
         return file
 
@@ -130,6 +130,10 @@ class ArgParser(object):
         return args
 
 
-if __name__ == '__main__':
+def main():
     args = ArgParser().parse()
-    FileRenamer(args.path, args.no_change).rename_files_in_directory()
+    FileManager(args.path, args.no_change).rename_files_in_directory()
+
+
+if __name__ == '__main__':
+    main()
