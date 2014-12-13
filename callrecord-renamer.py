@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import time
 from datetime import datetime
 import phonenumbers
 import os
@@ -37,15 +38,15 @@ class FileManager(object):
         self.path = base_directory
         self.no_change = no_change
 
-    def rename_files_in_directory(self):
+    def update_files_in_directory(self):
         files = self.__get_prepared_renameable_files()
         substituted_files = map(FileManager.__substitute_fields_of_file, files)
 
         for file in substituted_files:
-            self.__rename(old_name=file["name"],
-                          new_name=FileManager.__new_name_for_file(file),
-                          extension=file["extension"],
-                          )
+            self.__rename_and_fix_times(old_name=file["substitutes"]["name"],
+                                        new_name=FileManager.__new_name_for_file(file["substitutes"]),
+                                        extension=file["substitutes"]["extension"],
+                                        change_time=file["data"]["datetime"])
 
     def __get_prepared_renameable_files(self):
         files = os.listdir(self.path)
@@ -91,25 +92,46 @@ class FileManager(object):
 
     @classmethod
     def __substitute_fields_of_file(cls, file: dict):
-        file["type"] = TYPE_ENUM[file["type"]]
-        file["datetime"] = file["datetime"].strftime(DATETIME_TEMPLATE)
-        if file["phonenum"] is None:
-            file["phonenum"] = "null"
-        else:
-            file["phonenum"] = PHONENUM_TEMPLATE.substitute(file["phonenum"])
-        return file
+        substitutes = dict()
+
+        for key in file.keys():
+            if key == "type":
+                substitutes[key] = TYPE_ENUM[file["type"]]
+
+            elif key == "datetime":
+                substitutes[key] = file["datetime"].strftime(DATETIME_TEMPLATE)
+
+            elif key == "phonenum":
+                if file[key] is None:
+                    substitutes[key] = "null"
+                else:
+                    substitutes[key] = PHONENUM_TEMPLATE.substitute(file[key])
+
+            else:
+                substitutes[key] = file[key]
+
+        return {"data": file, "substitutes": substitutes}
 
     @classmethod
     def __new_name_for_file(cls, file: dict):
         return FILENAME_TEMPLATE.substitute(file)
 
-    def __rename(self, old_name: str, new_name: str, extension: str):
+    def __rename_and_fix_times(self, old_name: str, new_name: str, extension: str, change_time: datetime):
         old_full_name = "%s%s%s" % (old_name, os.extsep, extension)
         new_full_name = "%s%s%s" % (new_name, os.extsep, extension)
         print("%s\t=>\t%s" % (old_full_name, new_full_name))
 
         if not self.no_change:
-            os.rename(os.path.join(self.path, old_full_name), os.path.join(self.path, new_full_name))
+            old_path = os.path.join(self.path, old_full_name)
+            new_path = os.path.join(self.path, new_full_name)
+
+            FileManager.__set_change_times(old_path, change_time)
+            os.rename(old_path, new_path)
+
+    @classmethod
+    def __set_change_times(cls, path: str, change_time: datetime):
+        timestamp = int(time.mktime(change_time.timetuple()))+3600
+        os.utime(path, (timestamp, timestamp))
 
 
 class ArgParser(object):
@@ -132,7 +154,7 @@ class ArgParser(object):
 
 def main():
     args = ArgParser().parse()
-    FileManager(args.path, args.no_change).rename_files_in_directory()
+    FileManager(args.path, args.no_change).update_files_in_directory()
 
 
 if __name__ == '__main__':

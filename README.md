@@ -1,5 +1,5 @@
 # Callrecord Renamer
-Reformat special file names.
+Reformat special file names and update change times (access and modification times too).
 
 ## Requirements
 
