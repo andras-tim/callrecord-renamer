@@ -1,6 +1,7 @@
 # Callrecord Renamer
 Reformat special file names and update change times (access and modification times too).
 
+
 ## Requirements
 
 * Python 3.x:
@@ -11,17 +12,24 @@ Reformat special file names and update change times (access and modification tim
 
    Run the following command on Windows: `C:\Python34\Scripts\easy_install.exe phonenumbers`
 
+
+## Setup
+
+1. Install requirements
+2. Create a ``contacts.ini`` (check ``contacts.example.ini`` for example)
+3. Run script
+
 ## Examples
 ```
-0d20141212160318p+36305566778.mp4     => BE 2014.12.12-16.03 +36(30)556-6778.mp4
-1d20141125144524p+3630556677.mp4      => KI 2014.11.25-14.45 +36(30)556-677.mp4
-1d20141207215358p+3615566778.mp4      => KI 2014.12.07-21.53 +36(1)556-6778.mp4
-1d20141207215358p+3628556677.mp4      => KI 2014.12.07-21.53 +36(28)556-677.mp4
-1d20141207215358p+36305566778.mp4     => KI 2014.12.07-21.53 +36(30)556-6778.mp4
-1d20141207215358p+36305566778899.mp4  => KI 2014.12.07-21.53 +36305566778899.mp4
-1d20141207215358p180.mp4              => KI 2014.12.07-21.53 180.mp4
-0d20141126091240pnull.mp4             => BE 2014.11.26-09.12 null.mp4
-0d20141126241240pnull.mp4             => BE 2014.11.27-00.12 null.mp4
+0d20141212160318p+36305566778.mp4     => BE 2014.12.12-16.03 +36(30)556-6778 Foo Bar.mp4
+1d20141125144524p+3630556677.mp4      => KI 2014.11.25-14.45 +36(30)556-677 Orange Bar.mp4
+1d20141207215358p+3615566778.mp4      => KI 2014.12.07-21.53 +36(1)556-6778 Apple Juice.mp4
+1d20141207215358p+3628556677.mp4      => KI 2014.12.07-21.53 +36(28)556-677 Carrot Line.mp4
+1d20141207215358p+36305566778.mp4     => KI 2014.12.07-21.53 +36(30)556-6778 Foo Bar.mp4
+1d20141207215358p+36305566778899.mp4  => KI 2014.12.07-21.53 +36305566778899 Fly City.mp4
+1d20141207215358p180.mp4              => KI 2014.12.07-21.53 180 Time Service.mp4
+0d20141126091240pnull.mp4             => BE 2014.11.26-09.12 null null.mp4
+0d20141126241240pnull.mp4             => BE 2014.11.27-00.12 null null.mp4
 0d20141212160318p+36305566778 xyz.mp4 (skipped)
 1d20141207215358p+36305588778.tmp     (skipped)
 temporary.mp4                         (skipped)
