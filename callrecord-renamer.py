@@ -21,6 +21,7 @@ from string import Template
 
 
 __author__ = 'Andras Tim'
+__version__ = '1.1.1'
 
 EXTENSIONS = ['mp4']  # lowercase
 FILENAME_PATTERN = re.compile(r'^(?P<type>0|1)d(?P<datetime>\d{14})p(?P<phonenum>[+\d]+|null)$')
@@ -275,6 +276,7 @@ class ArgParser(object):
 
         self.parser = argparse.ArgumentParser(description='Automatic rename tool for files of call recorder',
                                               formatter_class=_WideHelpFormatter)
+        self.parser.add_argument('--version', action='version', version=__version__)
         self.parser.add_argument('-t', '--test', action='store_true', dest='no_change',
                                  help='test mode; filesystem will not be changed')
         self.parser.add_argument('-s', '--skip', action='store_true', dest='skip_errors',
