@@ -15,7 +15,7 @@ from string import Template
 #     Download and install Python from:
 #       https://www.python.org/downloads/
 #
-# * Python 'phonenumbers' Module:
+# * Python ``phonenumbers`` Module:
 #     Run the following command:
 #       C:\Python34\Scripts\easy_install.exe phonenumbers
 
@@ -273,31 +273,41 @@ class ArgParser(object):
     def __init__(self):
         supported_extensions = ', '.join(map(lambda e: '*.%s' % e, EXTENSIONS))
 
-        self.parser = argparse.ArgumentParser(description='Automatic rename tool for files of call recorder')
+        self.parser = argparse.ArgumentParser(description='Automatic rename tool for files of call recorder',
+                                              formatter_class=_WideHelpFormatter)
         self.parser.add_argument('-t', '--test', action='store_true', dest='no_change',
                                  help='test mode; filesystem will not be changed')
         self.parser.add_argument('-s', '--skip', action='store_true', dest='skip_errors',
                                  help='skip errors; process will not break when an error occurred')
         self.parser.add_argument('-c', '--contacts', dest='contacts_path', type=str, metavar='PATH',
                                  help='path of contacts INI file for mapping names to numbers')
-        self.parser.add_argument('path', type=str,
+        self.parser.add_argument('recording_path', type=str,
                                  help='path of call files (%s)' % supported_extensions)
 
     def parse(self):
         args = self.parser.parse_args()
-        if not os.path.isdir(args.path):
-            self.parser.error('The specified directory is not exists: %r' % args.path)
+        if not os.path.isdir(args.recording_path):
+            self.parser.error('The specified directory is not exists: %r' % args.recording_path)
         if not os.path.isfile(args.contacts_path):
             self.parser.error('The specified contacts INI file is not exists: %r' % args.contacts_path)
 
         return args
 
 
+class _WideHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def __init__(self, prog, *args, **kwargs):
+        indent_increment = 2
+        max_help_position = 40
+        width = int(os.getenv("COLUMNS", 120)) - 2
+
+        super().__init__(prog, indent_increment, max_help_position, width)
+
+
 def main():
     args = ArgParser().parse()
 
     contacts_path = Contacts(args.contacts_path)
-    FileManager(args.path, contacts_path, args.no_change, args.skip_errors).update_files_in_directory()
+    FileManager(args.recording_path, contacts_path, args.no_change, args.skip_errors).update_files_in_directory()
 
 
 if __name__ == '__main__':

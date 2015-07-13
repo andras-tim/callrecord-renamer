@@ -8,7 +8,7 @@ Reformat special file names and update change times (access and modification tim
 
    Download and install Python from: https://www.python.org/downloads/
 
-* Python 'phonenumbers' Module: 
+* Python ``phonenumbers`` Module:
 
    Run the following command on Windows: `C:\Python34\Scripts\easy_install.exe phonenumbers`
 
