@@ -4,8 +4,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [Unreleased][unreleased]
+*nothing yet*
+
+
+## [1.2.0] - 2015-09-27
 ### Added
 - Added changelog and version tags.
+
+### Fixed
+- Name collision in when two calls started/received to same number in same minutes #1
 
 
 ## [1.1.1] - 2015-07-13
@@ -27,6 +34,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - User can skip the parse errors (process will not be aborted on error)
 
 
-[unreleased]: https://github.com/andras-tim/callrecord-renamer/compare/v1.1.1...HEAD
+[unreleased]: https://github.com/andras-tim/callrecord-renamer/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/andras-tim/callrecord-renamer/compare/v1.2.0...v1.1.1
 [1.1.1]: https://github.com/andras-tim/callrecord-renamer/compare/v1.1.1...v1.1.0
 [1.1.0]: https://github.com/andras-tim/callrecord-renamer/compare/v1.1.0...v1.0.0

@@ -21,7 +21,7 @@ from string import Template
 
 
 __author__ = 'Andras Tim'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 
 EXTENSIONS = ['mp4']  # lowercase
 FILENAME_PATTERN = re.compile(r'^(?P<type>0|1)d(?P<datetime>\d{14})p(?P<phonenum>[+\d]+|null)$')
@@ -30,7 +30,7 @@ DATETIME_PATTERN = re.compile(r'^(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})'
 INTERNATIONAL_PHONENUM_TEMPLATE = re.compile(r'^(?P<country>[+\d]+) (?P<region>\d+) (?P<digits1>\d+) (?P<digits2>\d+)$')
 
 FILENAME_TEMPLATE = Template('${type} ${datetime} ${phonenum} ${contact}')
-DATETIME_TEMPLATE = '%Y.%m.%d-%H.%M'
+DATETIME_TEMPLATE = '%Y.%m.%d-%H.%M.%S'
 PHONENUM_TEMPLATE = Template('${country}(${region})${digits1}-${digits2}')
 TYPE_ENUM = {0: 'BE', 1: 'KI'}
 
