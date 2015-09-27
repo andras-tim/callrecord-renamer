@@ -1,4 +1,8 @@
 # Callrecord Renamer
+[![Releases](https://img.shields.io/github/release/andras-tim/callrecord-renamer.svg)](https://github.com/andras-tim/callrecord-renamer/releases)
+[![Open issues](https://img.shields.io/github/issues/andras-tim/callrecord-renamer.svg)](https://github.com/andras-tim/callrecord-renamer/issues)
+[![License](https://img.shields.io/badge/license-GPL%202.0-blue.svg)](https://github.com/andras-tim/callrecord-renamer/blob/master/LICENSE)
+
 Reformat special file names and update change times (access and modification times too).
 
 
