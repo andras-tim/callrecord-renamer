@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added some badges
 
+### Changed
+- The `recording_path` argument is not mandatory
+
 ### Fixed
 - Version links in changelog
 - Fixed encoding of `contacts.ini` to utf-8

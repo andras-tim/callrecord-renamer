@@ -23,6 +23,8 @@ from string import Template
 __author__ = 'Andras Tim'
 __version__ = '1.2.0'
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 EXTENSIONS = ['mp4']  # lowercase
 FILENAME_PATTERN = re.compile(r'^(?P<type>0|1)d(?P<datetime>\d{14})p(?P<phonenum>[+\d]+|null)$')
 DATETIME_PATTERN = re.compile(r'^(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})'
@@ -282,16 +284,19 @@ class ArgParser(object):
         self.parser.add_argument('-s', '--skip', action='store_true', dest='skip_errors',
                                  help='skip errors; process will not break when an error occurred')
         self.parser.add_argument('-c', '--contacts', dest='contacts_path', type=str, metavar='PATH',
-                                 help='path of contacts INI file for mapping names to numbers')
+                                 default=os.path.join(BASE_DIR, 'contacts.ini'),
+                                 help='path of contacts INI file for mapping names to numbers (default: %(default)s)')
         self.parser.add_argument('recording_path', type=str,
                                  help='path of call files (%s)' % supported_extensions)
 
     def parse(self):
         args = self.parser.parse_args()
+
         if not os.path.isdir(args.recording_path):
             self.parser.error('The specified directory is not exists: %r' % args.recording_path)
+
         if not os.path.isfile(args.contacts_path):
-            self.parser.error('The specified contacts INI file is not exists: %r' % args.contacts_path)
+            print('WARNING: The specified contacts INI file is not exists: %r' % args.contacts_path, file=sys.stderr)
 
         return args
 

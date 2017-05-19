@@ -20,8 +20,11 @@ Reformat special file names and update change times (access and modification tim
 ## Setup
 
 1. Install requirements
-2. Create a ``contacts.ini`` (check ``contacts.example.ini`` for example)
-3. Run script
+2. Run script with specifying the **recording_path**:
+
+    ```bash
+    ./callrecord-renamer.py /my/call/recordings/path
+    ```
 
 ## Examples
 ```
