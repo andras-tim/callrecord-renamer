@@ -21,7 +21,7 @@ from string import Template
 
 
 __author__ = 'Andras Tim'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
