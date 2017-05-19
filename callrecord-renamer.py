@@ -53,10 +53,10 @@ class Contacts(object):
 
     def load(self):
         self.database.read_dict(self.EMPTY_DATABASE)
-        self.database.read(self.file_path)
+        self.database.read(self.file_path, encoding='utf-8')
 
     def save(self):
-        with open(self.file_path, 'w') as fd:
+        with open(self.file_path, 'w', encoding='utf-8') as fd:
             self.database.write(fd)
 
     def get_contact_name_by_number(self, number: str) -> str:

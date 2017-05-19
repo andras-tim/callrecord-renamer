@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Version links in changelog
+- Fixed encoding of `contacts.ini` to utf-8
 
 
 ## [1.2.0] - 2015-09-27
