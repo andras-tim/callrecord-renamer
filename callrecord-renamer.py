@@ -11,17 +11,17 @@ from datetime import datetime, timedelta
 from string import Template
 
 # REQUIREMENTS
-# * Python 3.x:
+# * Python >=3.8:
 #     Download and install Python from:
 #       https://www.python.org/downloads/
 #
 # * Python ``phonenumbers`` Module:
 #     Run the following command:
-#       C:\Python34\Scripts\easy_install.exe phonenumbers
+#       C:\Python38\Scripts\easy_install.exe phonenumbers
 
 
 __author__ = 'Andras Tim'
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 

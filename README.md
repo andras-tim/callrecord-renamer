@@ -8,13 +8,13 @@ Reformat special file names and update change times (access and modification tim
 
 ## Requirements
 
-* Python 3.x:
+* Python 3.8+:
 
    Download and install Python from: https://www.python.org/downloads/
 
-* Python ``phonenumbers`` Module:
+* Python ``phonenumbers`` module:
 
-   Run the following command on Windows: `C:\Python34\Scripts\easy_install.exe phonenumbers`
+   Run the following command on Windows: `C:\Python38\Scripts\easy_install.exe phonenumbers`
 
 
 ## Setup
