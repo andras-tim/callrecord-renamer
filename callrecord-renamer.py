@@ -8,7 +8,7 @@ import sys
 import time
 from datetime import datetime
 from string import Template
-from typing import Optional
+from typing import Iterable, Optional
 
 import phonenumbers
 
@@ -54,11 +54,11 @@ class Contacts(object):
         self.database = configparser.ConfigParser()
         self.file_path = ini_file_path
 
-    def load(self):
+    def load(self) -> None:
         self.database.read_dict(self.EMPTY_DATABASE)
         self.database.read(self.file_path, encoding='utf-8')
 
-    def save(self):
+    def save(self) -> None:
         with open(self.file_path, 'w', encoding='utf-8') as fd:
             self.database.write(fd)
 
@@ -66,9 +66,10 @@ class Contacts(object):
         if number not in self.database[self.SECTION_CONTACTS]:
             self.__add_as_new_contact(number)
             raise MissingContact('Missing contact name for number: {}'.format(number))
+
         return self.database[self.SECTION_CONTACTS][number]
 
-    def __add_as_new_contact(self, number: str):
+    def __add_as_new_contact(self, number: str) -> None:
         self.database.set(self.SECTION_UNKNOWN, number, '?')
 
 
@@ -76,14 +77,13 @@ class FileManager(object):
     class ParseError(Exception):
         pass
 
-    def __init__(self, base_directory: str, contacts: Contacts, no_change=False,
-                 skip_errors=False):
+    def __init__(self, base_directory: str, contacts: Contacts, no_change: bool = False, skip_errors: bool = False):
         self.path = base_directory
         self.contacts = contacts
         self.no_change = no_change
         self.skip_errors = skip_errors
 
-    def update_files_in_directory(self):
+    def update_files_in_directory(self) -> None:
         files = self.__get_prepared_renameable_files()
         substituted_files = map(FileManager.__substitute_fields_of_file, files)
 
@@ -102,7 +102,7 @@ class FileManager(object):
 
         self.contacts.save()
 
-    def __get_contact_name_for_phone_number(self, file: dict) -> (str, None):
+    def __get_contact_name_for_phone_number(self, file: dict) -> Optional[str]:
         phonenum = file['substitutes']['phonenum']
         if phonenum == 'null':
             return 'null'
@@ -116,7 +116,7 @@ class FileManager(object):
             ))
             return None
 
-    def __get_prepared_renameable_files(self):
+    def __get_prepared_renameable_files(self) -> Iterable[dict]:
         files = os.listdir(self.path)
         split_files = map(FileManager.__split_full_filename, files)
         parsed_files = map(self.__parse_file_name, split_files)
@@ -125,11 +125,11 @@ class FileManager(object):
         return filtered_parsed_files
 
     @classmethod
-    def __split_full_filename(cls, file_name: str):
+    def __split_full_filename(cls, file_name: str) -> dict:
         split_file_name = os.path.splitext(file_name)
         return {'name': split_file_name[0], 'extension': split_file_name[1][1:]}
 
-    def __parse_file_name(self, file: dict):
+    def __parse_file_name(self, file: dict) -> Optional[dict]:
         if not file['extension'].lower() in EXTENSIONS:
             return None
 
@@ -149,7 +149,7 @@ class FileManager(object):
         return file
 
     @classmethod
-    def __parse_type(cls, raw_type):
+    def __parse_type(cls, raw_type: str) -> int:
         int_type = int(raw_type)
         if int_type not in TYPE_ENUM.keys():
             raise cls.ParseError('Bad type format! %s' % raw_type)
@@ -197,7 +197,7 @@ class FileManager(object):
         return result
 
     @classmethod
-    def __substitute_fields_of_file(cls, file: dict):
+    def __substitute_fields_of_file(cls, file: dict) -> dict:
         substitutes = dict()
 
         for key in file.keys():
@@ -221,10 +221,10 @@ class FileManager(object):
         return {'data': file, 'substitutes': substitutes}
 
     @classmethod
-    def __new_name_for_file(cls, file: dict):
+    def __new_name_for_file(cls, file: dict) -> str:
         return FILENAME_TEMPLATE.substitute(file)
 
-    def __rename_and_fix_times(self, old_name: str, new_name: str, extension: str, change_time: datetime):
+    def __rename_and_fix_times(self, old_name: str, new_name: str, extension: str, change_time: datetime) -> None:
         old_full_name = '%s%s%s' % (old_name, os.extsep, extension)
         new_full_name = '%s%s%s' % (new_name, os.extsep, extension)
         print('%s\t=>\t%s' % (old_full_name, new_full_name))
@@ -237,7 +237,7 @@ class FileManager(object):
             os.rename(old_path, new_path)
 
     @classmethod
-    def __set_change_times(cls, path: str, change_time: datetime):
+    def __set_change_times(cls, path: str, change_time: datetime) -> None:
         timestamp = int(time.mktime(change_time.timetuple())) + 3600
         os.utime(path, (timestamp, timestamp))
 
@@ -276,7 +276,7 @@ class ArgParser(object):
         self.parser.add_argument('recording_path', type=str,
                                  help='path of call files (%s)' % supported_extensions)
 
-    def parse(self):
+    def parse(self) -> argparse.Namespace:
         args = self.parser.parse_args()
 
         if not os.path.isdir(args.recording_path):
@@ -297,7 +297,7 @@ class _WideHelpFormatter(argparse.RawDescriptionHelpFormatter):
         super().__init__(prog, indent_increment, max_help_position, width)
 
 
-def main():
+def main() -> None:
     args = ArgParser().parse()
 
     contacts_path = Contacts(args.contacts_path)
