@@ -2,13 +2,15 @@
 import argparse
 import configparser
 import os
-import phonenumbers
 import pprint
 import re
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from string import Template
+from typing import Optional
+
+import phonenumbers
 
 # REQUIREMENTS
 # * Python >=3.8:
@@ -21,19 +23,18 @@ from string import Template
 
 
 __author__ = 'Andras Tim'
-__version__ = '1.2.2'
+__version__ = '1.3.0'
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-EXTENSIONS = ['mp4']  # lowercase
-FILENAME_PATTERN = re.compile(r'^(?P<type>0|1)d(?P<datetime>\d{14})p(?P<phonenum>[+\d]+|null)$')
-DATETIME_PATTERN = re.compile(r'^(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})'
-                              '(?P<hour>\d{2})(?P<min>\d{2})(?P<sec>\d{2})$')
-INTERNATIONAL_PHONENUM_TEMPLATE = re.compile(r'^(?P<country>[+\d]+) (?P<region>\d+) (?P<digits1>\d+) (?P<digits2>\d+)$')
+LOCAL_PHONE_REGION = 'HU'
+EXTENSIONS = ['mp3']  # lowercase
+FILENAME_PATTERN = re.compile(r'^(?P<phonenum>[+\d]+|null)_(?P<type>[01])_(?P<timestamp>\d+)$')
+INTERNATIONAL_PHONENUM_TEMPLATE = re.compile(r'^(?P<country>[+\d]+) (?P<region>\d+) (?P<digits>[ \d]+)$')
 
 FILENAME_TEMPLATE = Template('${type} ${datetime} ${phonenum} ${contact}')
 DATETIME_TEMPLATE = '%Y.%m.%d-%H.%M.%S'
-PHONENUM_TEMPLATE = Template('${country}(${region})${digits1}-${digits2}')
+PHONENUM_TEMPLATE = Template('${country}(${region})${digits}')
 TYPE_ENUM = {0: 'BE', 1: 'KI'}
 
 
@@ -139,7 +140,7 @@ class FileManager(object):
 
         try:
             file['type'] = FileManager.__parse_type(file_matches['type'])
-            file['datetime'] = FileManager.__parse_datetime(file_matches['datetime'])
+            file['datetime'] = FileManager.__parse_timestamp(file_matches['timestamp'])
             file['phonenum'] = self.__parse_phone_number(file_matches['phonenum'])
         except Exception as e:
             self.print_error('PARSE ERROR!', {'file': file, 'file_matches': file_matches}, e)
@@ -156,58 +157,44 @@ class FileManager(object):
         return int_type
 
     @classmethod
-    def __parse_datetime(cls, raw_datetime):
-        matches = DATETIME_PATTERN.match(raw_datetime)
-        if matches is None:
-            raise cls.ParseError('Bad date-time format! %s' % raw_datetime)
-        datetime_matches = {k: int(v) for k, v in matches.groupdict().items()}
+    def __parse_timestamp(cls, raw_timestamp: str) -> datetime:
+        timestamp = int(raw_timestamp) / 1000
 
-        hour24_workaround = datetime_matches['hour'] == 24
-        if hour24_workaround:
-            datetime_matches['hour'] = 0
+        return datetime.utcfromtimestamp(timestamp)
 
-        date_object = datetime(datetime_matches['year'], datetime_matches['month'], datetime_matches['day'],
-                               datetime_matches['hour'], datetime_matches['min'], datetime_matches['sec'])
-
-        if hour24_workaround:
-            date_object += timedelta(days=1)
-
-        return date_object
-
-    def __parse_phone_number(self, raw_phone_number):
-        parsed_phone_number = None
-
+    def __parse_phone_number(self, raw_phone_number: str) -> Optional[dict]:
         if raw_phone_number == 'null':
             return None
 
-        if FileManager.__is_full_length_phone_number(raw_phone_number):
-            try:
-                parsed_phone_number = FileManager.__parse_full_length_phone_number(raw_phone_number)
-            except (phonenumbers.NumberParseException, self.ParseError) as e:
-                self.print_error('ERROR: Can not parse this full length phone number! '
-                                 'It will be leave in original form.',
-                                 {'phone_number': raw_phone_number}, e)
+        if len(raw_phone_number) < 9:
+            return {'raw': raw_phone_number}
 
-        if parsed_phone_number is None:
-            parsed_phone_number = {'raw': raw_phone_number}
+        if not raw_phone_number.startswith('06'):
+            raw_phone_number = '+{}'.format(raw_phone_number)
 
-        return parsed_phone_number
+        try:
+            return FileManager.__parse_full_length_phone_number(raw_phone_number)
+        except (phonenumbers.NumberParseException, self.ParseError) as e:
+            self.print_error('ERROR: Can not parse this full length phone number! '
+                             'It will be leave in original form.',
+                             {'phone_number': raw_phone_number}, e)
 
     @classmethod
-    def __parse_full_length_phone_number(cls, phone_number):
-        parsed_number = phonenumbers.parse(phone_number, None)
-        international_number = phonenumbers.format_number(parsed_number,
-                                                          phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+    def __parse_full_length_phone_number(cls, phone_number: str) -> dict:
+        parsed_number = phonenumbers.parse(phone_number, LOCAL_PHONE_REGION)
+        international_number = phonenumbers.format_number(
+            parsed_number,
+            phonenumbers.PhoneNumberFormat.INTERNATIONAL
+        )
 
         matches = INTERNATIONAL_PHONENUM_TEMPLATE.match(international_number)
         if matches is None:
             raise cls.ParseError('Bad international phone number! %s' % international_number)
 
-        return matches.groupdict()
+        result = matches.groupdict()
+        result['digits'] = result['digits'].replace(' ', '-')
 
-    @classmethod
-    def __is_full_length_phone_number(cls, phone_number):
-        return phone_number[0] == '+' or phone_number[0:1] == '06'
+        return result
 
     @classmethod
     def __substitute_fields_of_file(cls, file: dict):
